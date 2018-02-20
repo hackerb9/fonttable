@@ -2,10 +2,10 @@
 Print out every¹ unicode character, see all possible glyphs in your terminal
 
 ¹ Well... not quite *every* character. We don't want control codes
-and such, so general classes C, M, and Z won't be printed. (See the
-table of general category values at the end of this script.)
+and such, so general classes `C`, `M`, and `Z` won't be printed. (See the
+table of general category values at the end of the script.)
  
-If you don't have /usr/share/unicode/UnicodeData.txt on your system,
+If you don't have `/usr/share/unicode/UnicodeData.txt` on your system,
 a version cached in this script will be automatically used. 
 (v11.0.0d12, current as of Feb 19, 2018 from unicode.org).
 
@@ -29,6 +29,12 @@ Unihan database. If you'd like to see them as well, specify "-s"
    IDEOGRAPH range is printed. (See proplist.txt). Instead, it
    prints only characters the Unihan database knows exist.
    (Unihan_DictionaryIndices.txt).
+   
+4. As of Unicode 11 (2018), I count 27,000 printable characters in UnicodeData.txt. Additionally, there are 70,000 known CJK characters in the Unihan database. 
+        $ ./fonttable -s | awk '{print length($1)}'
+        27006
+        70792
+    (Some people claim much higher numbers because they are using PropList.txt and counting *allocated* regions, whether or not characters exist at those code points.)
 
 ## Usage
 
