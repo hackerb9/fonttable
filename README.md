@@ -1,4 +1,5 @@
-<img align="right" src="README.md.d/fonttable.gif">
+<img align="right" src="README.md.d/fonttable.gif" alt="Example of
+fonttable running in xterm -fa DroidSansMono -fd DroidSansFallback">
 
 # fonttable
 Print out every¹ unicode character, see all possible glyphs in your terminal
@@ -27,16 +28,21 @@ Unihan database. If you'd like to see them as well, specify "-s"
    valid characters. The solution is to only print characters
    specified in the UnicodeData.txt file.
 
-3. Likewise, not every CJK character in the allocated UNIFIED
-   IDEOGRAPH range is printed. (See proplist.txt). Instead, it
-   prints only characters the Unihan database knows exist.
-   (Unihan_DictionaryIndices.txt).
+3. Likewise, not every CJK code point in the allocated UNIFIED
+   IDEOGRAPH range is a character. Fonttable prints only characters
+   that the Unihan database knows exist. (Unihan_DictionaryIndices.txt).
    
-4. As of Unicode 11 (2018), I count 27,000 printable characters in UnicodeData.txt. Additionally, there are 70,000 known CJK characters in the Unihan database. 
+4. As of Unicode 11 (2018), I count 27,000 printable characters in
+   UnicodeData.txt. Additionally, there are 70,000 known CJK
+   characters in the Unihan database.
+
         $ ./fonttable -s | awk '{print length($1)}'
         27006
         70792
-    (Some people claim much higher numbers because they are using PropList.txt and counting *allocated* regions, whether or not characters exist at those code points.)
+
+    (Some people claim much higher numbers because they are using
+    PropList.txt and counting *allocated* regions, whether or not
+    characters exist at those code points.)
 
 ## Usage
 
@@ -60,13 +66,14 @@ ____
 
 # YMMV
 
-Different terminal programs and fonts will give you drastically different results. 
+Different terminal programs and fonts will give you drastically
+different results.
 
 ## Gnome Terminal 
 
 For example, Gnome-Terminal-3.18.3 appears to fall back to proportional fonts for code points not in its default font, causing it to have overlapping glyphs. There is no setting to tell it not to do this:
 
-![Example of Gnome Terminal 3.18.3 running fonttable](/README.md.d/ss-gnome-terminal.png "Notice the overlapping glyphs"]
+![Example of Gnome Terminal 3.18.3 running fonttable](/README.md.d/ss-gnome-terminal.png "Notice the overlapping glyphs")
 
 While messy, this does have the benefit of ensuring that any Unicode character you come across will be shown. (Assuming you have a font for it, of course). 
 
@@ -79,7 +86,7 @@ The default xterm font, called "fixed", seems terrible as it has very few Unicod
 
     xterm  -fn '*fixed-medium-r-normal--20*10646*' 
     
-![Example of XTerm(322) running fonttable with neep](/README.md.d/ss-xterm-neep.png "Technically, I used the "neep" font, which I prefer to "fixed", but requires you to install xfonts-jmk]
+![Example of XTerm(322) running fonttable with neep](/README.md.d/ss-xterm-neep.png "Technically, I used the "neep" font, which I prefer to "fixed", but requires you to install xfonts-jmk)
 
 ### For antialiased fonts
 
@@ -87,5 +94,5 @@ You can also use xterm's capability to use TrueType fonts, which gives you have 
 
     xterm  -fa DroidSansMono  -fd DroidSansFallback
     
-![Example of XTerm(322) running fonttable with DroidSansMono](/README.md.d/ss-xterm-droidsans.png]
+![Example of XTerm(322) running fonttable with DroidSansMono](/README.md.d/ss-xterm-droidsans.png)
 
