@@ -1,0 +1,51 @@
+# fonttable
+Print out every¹ unicode character, see all possible glyphs in your terminal
+
+¹ Well... not quite *every* character. We don't want control codes
+and such, so general classes C, M, and Z won't be printed. (See the
+table of general category values at the end of this script.)
+ 
+If you don't have /usr/share/unicode/UnicodeData.txt on your system,
+a version cached in this script will be automatically used. 
+(v11.0.0d12, current as of Feb 19, 2018 from unicode.org).
+
+Additionally: the Unicode Consortium's "UnicodeData.txt" file does
+not list CJK characters, but they can be found in the adjacent
+Unihan database. If you'd like to see them as well, specify "-s" 
+
+## Notes
+
+1. This was inspired by the favorite 8-bit one-liner of many a youth:
+   
+         FORT=0TO255:?CHR$(T);:RUN 
+
+2. This is the modern equivalent, a way to see every valid glyph.
+   Of course, we can't use a simple loop since Unicode has a huge
+   address space and only a small fraction of the code points are
+   valid characters. The solution is to only print characters
+   specified in the UnicodeData.txt file.
+
+3. Likewise, not every CJK character in the allocated UNIFIED
+   IDEOGRAPH range is printed. (See proplist.txt). Instead, it
+   prints only characters the Unihan database knows exist.
+   (Unihan_DictionaryIndices.txt).
+
+## Usage
+
+    fonttable [ -c ] [ -s ] [ -u ] 
+        -c | --cache
+                Use cached UnicodeData.txt embedded in this script.
+                Usually the cached version is only used if the file is
+                not in /usr/share/unicode/ or the current directory.
+        -s | --show-unihan
+                Also show CJK data from the Unihan database.
+                The default is to not show characters that Unicode has
+                designated as mappings to other standards.
+        -u | --unihan-cache
+                Use a cached copy of the list of valid CJK characters
+                instead of looking for Unihan_DictionaryIndices.txt.
+
+        UnicodeData.txt contains about 30,000 characters.
+        Unihan adds another 70,000.
+
+
