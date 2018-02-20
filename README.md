@@ -19,12 +19,13 @@ Unihan database. If you'd like to see them as well, specify "-s"
 ## Notes
 
 1. This was inspired by the favorite 8-bit one-liner of many a youth:
-    <video width="320" height="240" controls>
+    <video>
     <source src="README.md.d/c64xterm.mp4" type="video/mp4">
-    <img width=50% align="right" src="README.md.d/c64xterm.gif">
+    <img width=50% align="right" src="README.md.d/c64xterm.gif"
+    alt="FORT=0TO255:?CHR$(T);:NEXT:RUN">
     </video> 
 
-         FORT=0TO255:?CHR$(T);:RUN 
+         FORT=0TO255:?CHR$(T);:NEXT:RUN 
 
 2. This is the modern equivalent, a way to see every valid glyph.
    Of course, we can't use a simple loop since Unicode has a huge
@@ -95,9 +96,7 @@ and uses. So, not a bad choice, and it comes pre-installed.
 
     xterm  -fn '*fixed-medium-r-normal--20*10646*' 
     
-![Example of XTerm(322) running fonttable with neep](/README.md.d/ss-xterm-neep.png "Technically, this is the 'neep'
- font, which I prefer to 'fixed', but requires you to install
- xfonts-jmk")
+![Example of XTerm(322) running fonttable with neep](/README.md.d/ss-xterm-neep.png "Technically, this is the 'neep' font, which I prefer to 'fixed', but requires you to install xfonts-jmk")
 
 ### For antialiased fonts
 
@@ -107,6 +106,5 @@ you have a much greater selection. You'll want to specify the
 
     xterm  -fa DroidSansMono  -fd DroidSansFallback
     
-![Example of XTerm(322) running fonttable with DroidSansMono](/README.md.d/ss-xterm-droidsans.png "fonttable demonstrating
-DroidSansFallback being used by xterm as a double-size font")
+![Example of XTerm(322) running fonttable with DroidSansMono](/README.md.d/ss-xterm-droidsans.png "fonttable demonstrating DroidSansFallback being used by xterm as a double-size font")
 
