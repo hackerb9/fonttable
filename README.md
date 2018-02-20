@@ -59,9 +59,8 @@ Unihan database. If you'd like to see them as well, specify "-s"
                 Usually the cached version is only used if the file is
                 not in /usr/share/unicode/ or the current directory.
         -s | --show-unihan
-                Also show CJK data from the Unihan database.
-                The default is to not show characters that Unicode has
-                designated as mappings to other standards.
+                Show Chinese, Japanese, Korean data from the Unihan database.
+                Default is to only show characters from UnicodeData.txt
         -u | --unihan-cache
                 Use a cached copy of the list of valid CJK characters
                 instead of looking for Unihan_DictionaryIndices.txt.
@@ -102,9 +101,8 @@ and uses. So, not a bad choice, and it comes pre-installed.
 
 ### For antialiased fonts
 
-You can also use xterm's capability to use TrueType fonts, which gives
-you have a much greater selection. You'll want to specify the
-"doublesize" font separately if xterm doesn't automatically detect it.
+Xterm can use TrueType fonts, which gives a much greater selection of fonts. You'll want to specify a
+"doublesize" font (-fd) separately, if xterm doesn't automatically detect it.
 
     xterm  -fa DroidSansMono  -fd DroidSansFallback
     
