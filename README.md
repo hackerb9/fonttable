@@ -1,3 +1,5 @@
+<img align="right" src="README.md.d/fonttable.gif">
+
 # fonttable
 Print out every¹ unicode character, see all possible glyphs in your terminal
 
@@ -54,4 +56,36 @@ Unihan database. If you'd like to see them as well, specify "-s"
         UnicodeData.txt contains about 30,000 characters.
         Unihan adds another 70,000.
 
+____
+
+# YMMV
+
+Different terminal programs and fonts will give you drastically different results. 
+
+## Gnome Terminal 
+
+For example, Gnome-Terminal-3.18.3 appears to fall back to proportional fonts for code points not in its default font, causing it to have overlapping glyphs. There is no setting to tell it not to do this:
+
+![Example of Gnome Terminal 3.18.3 running fonttable](/README.md.d/ss-gnome-terminal.png "Notice the overlapping glyphs"]
+
+While messy, this does have the benefit of ensuring that any Unicode character you come across will be shown. (Assuming you have a font for it, of course). 
+
+## Xterm
+Xterm handles this in a different way. Instead, it will use only the single font you specify. That means you'll need to find one font that covers every section of Unicode you use. This can be rather tricky.
+
+### For bitmap fonts
+
+The default xterm font, called "fixed", seems terrible as it has very few Unicode characters, but that is because xterm uses the Latin-1 version by default. There is a Unicode (10646) version of "fixed" which is not bad in terms of coverage. "Fixed" also comes in a wide version for Asian characters, which xterm automatically detects and uses.
+
+    xterm  -fn '*fixed-medium-r-normal--20*10646*' 
+    
+![Example of XTerm(322) running fonttable with neep](/README.md.d/ss-xterm-neep.png "Technically, I used the "neep" font, which I prefer to "fixed", but requires you to install xfonts-jmk]
+
+### For antialiased fonts
+
+You can also use xterm's capability to use TrueType fonts, which gives you have a much greater selection. You'll want to specify the "doublesize" font separately if xterm doesn't automatically detect it.
+
+    xterm  -fa DroidSansMono  -fd DroidSansFallback
+    
+![Example of XTerm(322) running fonttable with DroidSansMono](/README.md.d/ss-xterm-droidsans.png]
 
