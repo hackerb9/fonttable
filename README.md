@@ -19,11 +19,12 @@ Unihan database. If you'd like to see them as well, specify "-s"
 ## Notes
 
 1. This was inspired by the favorite 8-bit one-liner of many a youth:
-   <img width=50% align="right" src="README.md.d/c64xterm.mp4">
-   
+    <video width="320" height="240" controls>
+    <source src="README.md.d/c64xterm.mp4" type="video/mp4">
+    <img width=50% align="right" src="README.md.d/c64xterm.gif">
+    </video> 
+
          FORT=0TO255:?CHR$(T);:RUN 
-
-
 
 2. This is the modern equivalent, a way to see every valid glyph.
    Of course, we can't use a simple loop since Unicode has a huge
