@@ -86,7 +86,10 @@ The default xterm font, called "fixed", seems terrible as it has very few Unicod
 
     xterm  -fn '*fixed-medium-r-normal--20*10646*' 
     
-![Example of XTerm(322) running fonttable with neep](/README.md.d/ss-xterm-neep.png "Technically, I used the "neep" font, which I prefer to "fixed", but requires you to install xfonts-jmk)
+![Example of XTerm(322) running fonttable with neep]
+ (/README.md.d/ss-xterm-neep.png "Technically, this is the 'neep'
+ font, which I prefer to 'fixed', but requires you to install
+ xfonts-jmk")
 
 ### For antialiased fonts
 
@@ -94,5 +97,7 @@ You can also use xterm's capability to use TrueType fonts, which gives you have 
 
     xterm  -fa DroidSansMono  -fd DroidSansFallback
     
-![Example of XTerm(322) running fonttable with DroidSansMono](/README.md.d/ss-xterm-droidsans.png)
+![Example of XTerm(322) running fonttable with DroidSansMono]
+(/README.md.d/ss-xterm-droidsans.png "fonttable demonstrating the
+DroidSansFallback font being used by xterm")
 
