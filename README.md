@@ -7,9 +7,9 @@ Print out every¹ unicode character; see all possible glyphs in your terminal
 ¹ Well... not quite *every* character. We don't want control codes
 and such, so characters in categories `C`, `M`, and `Z` won't be printed. (See the table of [general category values](http://unicode.org/reports/tr44/#GC_Values_Table) at the end of the script.)
  
-If you don't have [`/usr/share/unicode/UnicodeData.txt`](ftp://ftp.unicode.org/Public/UNIDATA/UnicodeData.txt) on your system, a version cached in this script will be automatically used. (v11.0.0d12, current as of Feb 19, 2018 from unicode.org).
+If you don't have [`/usr/share/unicode/UnicodeData.txt`](http://unicode.org/Public/UNIDATA/UnicodeData.txt) on your system, a version cached in this script will be automatically used. (v11.0.0d12, current as of Feb 19, 2018 from unicode.org).
 
-Additionally: the Unicode Consortium's ["UnicodeData.txt"](ftp://ftp.unicode.org/Public/UNIDATA/UnicodeData.txt) file does not list CJK characters, but they can be found in the adjacent [Unihan](ftp://ftp.unicode.org/Public/UNIDATA/Unihan.zip) database. If you'd like to see them as well, specify "-s" 
+Additionally: the Unicode Consortium's ["UnicodeData.txt"](http://unicode.org/Public/UNIDATA/UnicodeData.txt) file does not list CJK characters, but they can be found in the adjacent [Unihan](http://unicode.org/Public/UNIDATA/Unihan.zip) database. If you'd like to see them as well, specify "-s" 
 
 ## Installation
 
