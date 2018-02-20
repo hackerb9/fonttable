@@ -1,5 +1,6 @@
-<img align="right" src="README.md.d/fonttable.gif" alt="Example of
-fonttable running in xterm -fa DroidSansMono -fd DroidSansFallback">
+<img align="right" src="README.md.d/fonttable.gif" title="Example of
+fonttable running in `xterm -fa DroidSansMono -fd DroidSansFallback`"
+alt="Scrolling CJK glyphs">
 
 # fonttable
 Print out every¹ unicode character, see all possible glyphs in your terminal
@@ -22,7 +23,8 @@ Unihan database. If you'd like to see them as well, specify "-s"
     <video>
     <source src="README.md.d/c64xterm.mp4" type="video/mp4">
     <img width=50% align="right" src="README.md.d/c64xterm.gif"
-    alt="FORT=0TO255:?CHR$(T);:NEXT:RUN">
+    alt="Scrolling C64 PETSCII" secret="You figured it out! It's actually
+    xterm -fa C64ProMono" title="FORT=0TO255:?CHR$(T);:NEXT:RUN">
     </video> 
 
          FORT=0TO255:?CHR$(T);:NEXT:RUN 
