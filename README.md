@@ -82,7 +82,12 @@ Xterm handles this in a different way. Instead, it will use only the single font
 
 ### For bitmap fonts
 
-The default xterm font, called "fixed", seems terrible as it has very few Unicode characters, but that is because xterm uses the Latin-1 version by default. There is a Unicode (10646) version of "fixed" which is not bad in terms of coverage. "Fixed" also comes in a wide version for Asian characters, which xterm automatically detects and uses.
+The default xterm font, called "fixed", seems a terrible choice as it
+has very few Unicode characters. However, that is because xterm uses
+the Latin-1 version by default. There is a Unicode (10646) version of
+"fixed" which is not bad in terms of coverage. "Fixed" also comes in a
+wide version for Asian characters, which xterm automatically detects
+and uses. So, not a bad choice, and it comes pre-installed.
 
     xterm  -fn '*fixed-medium-r-normal--20*10646*' 
     
@@ -92,10 +97,12 @@ The default xterm font, called "fixed", seems terrible as it has very few Unicod
 
 ### For antialiased fonts
 
-You can also use xterm's capability to use TrueType fonts, which gives you have a much greater selection. You'll want to specify the "doublesize" font separately if xterm doesn't automatically detect it.
+You can also use xterm's capability to use TrueType fonts, which gives
+you have a much greater selection. You'll want to specify the
+"doublesize" font separately if xterm doesn't automatically detect it.
 
     xterm  -fa DroidSansMono  -fd DroidSansFallback
     
-![Example of XTerm(322) running fonttable with DroidSansMono](/README.md.d/ss-xterm-droidsans.png "fonttable demonstrating the
-DroidSansFallback font being used by xterm")
+![Example of XTerm(322) running fonttable with DroidSansMono](/README.md.d/ss-xterm-droidsans.png "fonttable demonstrating
+DroidSansFallback being used by xterm as a double-size font")
 
