@@ -2,18 +2,19 @@
 # Print out every¹ unicode character in the UnicodeData.txt file.
 # ↄ⃝ 2018 hackerb9  Copyleft: All wrongs reversed.
 
-# ¹ Well... not quite *every* character. We don't want control codes
-# and such, so general classes C, M, and Z won't be printed. (See the
-# table of general category values at the end of this script.)
-# 
-# If you don't have /usr/share/unicode/UnicodeData.txt on your system,
-# a version cached in this script will be automatically used. 
-# (v11.0.0d12, current as of Feb 19, 2018 from unicode.org).
+# ¹ Well... not *every* character. This script shows every printable
+# *graphic* character. General classes C, M, and Z are omitted.
+# (See the table of general category values at the end of this script.)
 
 # Additionally: the Unicode Consortium's "UnicodeData.txt" file does
 # not list CJK characters, but they can be found in the adjacent
 # Unihan database. If you'd like to see them as well, specify "-s" 
 
+# If the UnicodeData.txt and Unihan_DictionaryIndices.txt files are
+# not found on your system, cached versions in this script will be
+# used as a fallback. (v13.0.0, current as of October 9, 2020).
+
+#
 # Notes:
 
 # 1. This was inspired by the favorite 8-bit one-liner of many a youth:
@@ -29,6 +30,14 @@
 #    IDEOGRAPH range is printed. (See proplist.txt). Instead, it
 #    prints only characters the Unihan database knows exist.
 #    (Unihan_DictionaryIndices.txt).
+
+# 4. The latest versions of UnicodeData.txt & Unihan_DictionaryIndices.txt
+#    can be be downloaded from:
+#
+#      http://unicode.org/Public/UNIDATA/UnicodeData.txt
+#      http://unicode.org/Public/UNIDATA/Unihan.zip 
+#
+#    Place them in /usr/local/share/unicode/
 
 usage() {
     cat << EOF
