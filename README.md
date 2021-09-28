@@ -7,7 +7,7 @@ Print out every¹ unicode character; see all possible glyphs in your terminal
 ¹ Well... not quite *every* character. We don't want control codes
 and such, so characters in categories `C`, `M`, and `Z` won't be printed. (See the table of [general category values](http://unicode.org/reports/tr44/#GC_Values_Table) at the end of the script.)
  
-If you don't have [`/usr/share/unicode/UnicodeData.txt`](http://unicode.org/Public/UNIDATA/UnicodeData.txt) on your system, a version cached in this script will be automatically used. (v11.0.0d12, current as of Feb 19, 2018 from unicode.org).
+If you don't have [`/usr/share/unicode/UnicodeData.txt`](http://unicode.org/Public/UNIDATA/UnicodeData.txt) on your system, a version cached in this script will be automatically used. (v14.0.0, current as of September 2021 from unicode.org).
 
 Additionally: the Unicode Consortium's ["UnicodeData.txt"](http://unicode.org/Public/UNIDATA/UnicodeData.txt) file does not list CJK characters, but they can be found in the adjacent [Unihan](http://unicode.org/Public/UNIDATA/Unihan.zip) database. If you'd like to see them as well, specify "-s" 
 
@@ -39,13 +39,13 @@ and run it.
    IDEOGRAPH range is a character. Fonttable prints only characters
    that the Unihan database knows exist. (Unihan_DictionaryIndices.txt).
    
-4. As of Unicode 11 (2018), I count 27,000 printable characters in
-   UnicodeData.txt. Additionally, there are 70,000 known CJK
+4. As of Unicode 14 (2021), I count almost 32,000 printable characters
+   in UnicodeData.txt. Additionally, there are over 70,000 known CJK
    characters in the Unihan database.
 
         $ ./fonttable -s | awk '{print length($1)}'
-        27006
-        70792
+        31959
+        70805
 
     (Some people claim much higher numbers because they are using
     PropList.txt and counting *allocated* regions, whether or not
