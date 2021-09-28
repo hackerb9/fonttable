@@ -72,7 +72,8 @@ main() {
 	    -S|--no-show-unihan*) showhanflag=;		;;
 	    -u|--unihan-cache*) unihancacheflag=yup;		;;
 	    -U|--no-unihan-cache*) unihancacheflag=;		;;
-	    --mkhancache) mkhancache; exit 0;	;;
+	    # mkhancache is for internal use when updating this script.
+	    --mkhancache) mkhancache; exit 0;	;; 	
 	    *) usage ;;
 	esac
 	shift
