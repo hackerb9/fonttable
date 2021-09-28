@@ -34729,7 +34729,7 @@ catucd() {
 }
 
 catunihan() {
-    if [ -z "$hancacheflag" ]; then
+    if [ -z "$unihancacheflag" ]; then
         for f in {,/usr{/local,}/share/unicode/}Unihan_DictionaryIndices.txt{,.bz2}
 	do
 	    if [ -r "$f" ]; then
