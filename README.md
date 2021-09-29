@@ -84,9 +84,16 @@ For example, Gnome-Terminal-3.18.3 appears to fall back to proportional fonts fo
 While messy, this does have the benefit of ensuring that any Unicode character you come across will be shown. (Assuming you have a font for it, of course). 
 
 ## Xterm
-Xterm handles this in a different way. Instead, it will use only the single font you specify. That means you'll need to find one font that covers every section of Unicode you use. This can be rather tricky.
+Xterm does the same thing when an antialiased (vector) font is
+selected, filling in with system fonts if the selected font is too
+limited. Bitmaps fonts however, are trickier.
 
 ### For bitmap fonts
+
+Xterm will use only a single font if you specify a bitmap font using
+`-fn`. That means you'll need to find one font that covers every
+section of Unicode you use. This can be rather tricky.
+
 
 The default xterm font, called "fixed", seems a terrible choice as it
 has very few Unicode characters. However, that is because xterm uses
@@ -101,10 +108,35 @@ and uses. So, not a bad choice, and it comes pre-installed.
 
 ### For antialiased fonts
 
-Xterm can use TrueType fonts, which gives a much greater selection of fonts. You'll want to specify a
-"doublesize" font (-fd) separately, if xterm doesn't automatically detect it.
+XTerm already fills in missing glyphs for you by using other fonts
+when you specify an antialiased font using `-fa`. Use `-fs` to specify
+the point size. Note: "Antialiased" is how XTerm refers to vector
+fonts like TrueType, OpenType, and Type 1.
 
-    xterm  -fa DroidSansMono  -fd DroidSansFallback
+If you wish to see which fonts are getting loaded as you run
+fonttable, set the XFT_DEBUG environment variable to 3 before running
+xterm. 
+
+    XFT_DEBUG=3 xterm -fa DroidSansMono -fs 24
+
+If you wish to force xterm to use *only* the fonts you requested, you
+can do so by setting the `limitFontsets` X resource to 0.
+
+    xterm -fa DroidSansMono -xrm "XTerm*vt100.limitFontsets: 0"
     
+Note that xterm will attempt to automatically detect if your font is
+also available in a doublesize version (for CJK). If it doesn't find
+it, you can specify a separate "doublesize" font using `-fd`.
+
+    xterm -fs 24 -fa DroidSansMono -fd DroidSansFallback -xrm "XTerm*vt100.limitFontsets: 0"
+    
+Note that if you don't have a particular font installed, even if you
+use limitFontsets: 0, you will be shown a substitute font. Again, you
+can use XFT_DEBUG to find out what is going on.
+
+    XFT_DEBUG=3 xterm -fs 24 -fa DroidSansMono -fd DroidSansFallback -xrm "XTerm*vt100.limitFontsets: 0"
+    
+
+
 ![Example of XTerm(322) running fonttable with DroidSansMono](/README.md.d/ss-xterm-droidsans.png "fonttable demonstrating DroidSansFallback being used by xterm as a double-size font")
 
