@@ -43,7 +43,7 @@ usage() {
     cat << EOF
 fonttable: Show every Unicode character in your terminal.
 
-Usage: fonttable [ -c ] [ -s ] [ -u ] 
+Usage: fonttable [ -c ] [ -s ] [ -u ] [ START..END ]
 	-c | --cache
 		Use cached UnicodeData.txt embedded in this script.
 		Usually the cached version is only used if the file is
@@ -55,6 +55,10 @@ Usage: fonttable [ -c ] [ -s ] [ -u ]
 	-u | --unihan-cache
 		Use a cached copy of the list of valid CJK characters
 		instead of looking for Unihan_DictionaryIndices.txt.
+	START..END
+		Show range from hexadecmial numbers START to END,
+		inclusive. START defaults to 0, END defaults to
+		infinity.  Example: fonttable 1F170..98
 
 	UnicodeData.txt contains about 30,000 characters.
         Unihan adds another 70,000.
@@ -64,28 +68,75 @@ EOF
 }
 
 main() {
+    local start="" end=""
+
     while [ "$1" ]; do
 	case "$1" in
 	    -c|--cache*) cacheflag=yup;     		;;
 	    -C|--no-cache*) cacheflag=;			;;
 	    -s|--show-unihan*) showhanflag=yup;		;;
 	    -S|--no-show-unihan*) showhanflag=;		;;
-	    -u|--unihan-cache*) unihancacheflag=yup;		;;
+	    -u|--unihan-cache*) unihancacheflag=yup; showhanflag=yup;	;;
 	    -U|--no-unihan-cache*) unihancacheflag=;		;;
 	    # mkhancache is for internal use when updating this script.
 	    --mkhancache) mkhancache; exit 0;	;; 	
+	    *..*)
+		# User specified a range START..END
+		start=${1%..*}
+		end=${1#*..}
+		;;
 	    *) usage ;;
 	esac
 	shift
     done
 
-    catucd | awk  -F';'  '$3 !~ /C|M|Z/ { printf ("%c", strtonum("0x" $1)) };'
+    # Allow U+2022, U2022, 0x2022, or 2022 for start and end
+    start=${start#u}; start=${start#U}; start=${start#+}; start=${start#0x}
+    end=${end#u};     end=${end#U};     end=${end#+};     end=${end#0x}
+
+    if [[ -z "$start" ]]; then start=0; fi
+    if [[ -z "$end" ]]; then end=10FFFF; fi
+
+    # Allow users to specify things like "fonttable 23b0..f"
+    if [[ ${#start} > ${#end} ]]; then
+	local -i d=$(( ${#start} - ${#end} ))
+	end=${start:0:$d}$end
+    fi
+
+
+    catucd | restrict "$start" "$end" \
+    	| awk  -F';'  '$3 !~ /C|M|Z/ { printf ("%c", strtonum("0x" $1)) };'
     echo
     if [ "$showhanflag" ]; then
-        catunihan | awk  '{ printf ("%c", strtonum("0x" $1)) };'
+        catunihan | restrict "$start" "$end" \
+	    | awk '{printf ("%c", strtonum("0x" $1));}'
         echo
     fi  
 }
+
+
+restrict() {
+    # Given two arguments, start and end, as hexadecimal numbers, only
+    # print the lines for which the first semicolon-delimited field is
+    # between those two numbers, inclusive.
+
+    # If either is missing, then that end of the range is not restricted.
+    local start="$1"
+    local end="$2"
+
+    if [[ -z "$start" && -z "$end" ]]; then
+	cat			# Not restricting
+	return
+    fi
+
+    awk -F';' -v start=$((16#$start)) -v end=$((16#$end)) '
+    {
+	n=strtonum("0x" $1);
+	if ( n >= start && n <= end) { print; } 
+    }'
+
+}
+
 
 catucd() {
     if [ -z "$cacheflag" ]; then
