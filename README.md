@@ -64,10 +64,10 @@ and run it.
         -u | --unihan-cache
                 Use a cached copy of the list of valid CJK characters
                 instead of looking for Unihan_DictionaryIndices.txt.
-		START..END
-			Show range from START to END, inclusive. (Hexadecimal). 
-			START defaults to 0, END defaults to infinity.
-			Example: fonttable 1F170..98
+        START..END
+            Show range from START to END, inclusive. (Hexadecimal). 
+            START defaults to 0, END defaults to infinity.
+            Example: fonttable 1F170..98
 
         UnicodeData.txt contains about 30,000 characters.
         Unihan adds another 70,000.
