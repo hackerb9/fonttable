@@ -53,7 +53,7 @@ and run it.
 
 ## Usage
 
-    fonttable [ -c ] [ -s ] [ -u ] 
+    fonttable [ -c ] [ -s ] [ -u ] [ START..END ]
         -c | --cache
                 Use cached UnicodeData.txt embedded in this script.
                 Usually the cached version is only used if the file is
