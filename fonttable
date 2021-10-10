@@ -105,14 +105,10 @@ main() {
 	    end=${start:0:$d}$end
 	fi
 
+	catucd | restrict "$start" "$end" | printvisible
 
-	catucd | restrict "$start" "$end" \
-    	    | awk  -F';'  '$3 !~ /C|M|Z/ { printf ("%c", strtonum("0x" $1)) };'
-	echo
 	if [ "$showhanflag" ]; then
-            catunihan | restrict "$start" "$end" \
-		| awk '{printf ("%c", strtonum("0x" $1));}'
-            echo
+            catunihan | restrict "$start" "$end" | printvisible
 	fi  
     done
 }
@@ -141,6 +137,23 @@ restrict() {
 	if ( n >= start && n <= end) { print; } 
     }'
 
+}
+
+
+printvisible() {
+    # Given a series of lines where the first field (delimited by
+    # semicolons) is a hexadecimal number, print the Unicode character
+    # for that code point if it is printable. For UnicodeData.txt that
+    # means the third field is NOT C, M, or Z. (For UniHan, there is
+    # no third field, so we print all characters.)
+    #
+    # If anything gets printed, then a newline is added to the end.
+
+    awk  -F';'  '$3 !~ /C|M|Z/ { 
+    	 	    printf ("%c", strtonum("0x" $1)); 
+		    gotone=1;
+		};
+    	 	END {if (gotone) print "";}'
 }
 
 
