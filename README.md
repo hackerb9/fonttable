@@ -67,9 +67,9 @@ and run it.
         START..END
             Show range from START to END, inclusive. (Hexadecimal). 
             START defaults to 0, END defaults to infinity.
-            Example: fonttable 2500..90 1FB00..AF
+            Multiple ranges are allowed: fonttable 2590..f 1fb00..ff
 
-        UnicodeData.txt contains arund 30,000 characters.
+        UnicodeData.txt contains around 30,000 characters.
         Unihan adds another 70,000.
 
 ____
@@ -80,28 +80,47 @@ Different terminal programs and fonts will give you drastically
 different results.
 
 ## Gnome Terminal 
+
+Gnome-Terminal-3.38.3 uses multiple fonts using FreeType. For some
+characters, such as ⑫ (Circled Number Twelve) the glyphs are too wide
+for the character cell and overlap badly. There appears to be no
+setting to tell Gnome-Terminal to shrink or truncate overly wide
+glyphs.
+
 <details>
 
-Gnome-Terminal-3.18.3 appears to fall back to proportional fonts for code points not in its default font, causing it to have overlapping glyphs. There is no setting to tell it not to do this:
+![Example of Gnome Terminal 3.38.3 running fonttable](/README.md.d/ss-gnome-terminal.png "Notice the overlapping glyphs")
 
-![Example of Gnome Terminal 3.18.3 running fonttable](/README.md.d/ss-gnome-terminal.png "Notice the overlapping glyphs")
+Gnome Terminal has very few user settable preferences, but you can set
+"Ambiguous Width" characters to be wide (two cells) instead of narrow.
+This helps quite a bit, at least on this torture test. 
 
-While messy, this does have the benefit of ensuring that any Unicode character you come across will be shown. (Assuming you have a font for it, of course). 
+![Example of Gnome Terminal's Ambiguous-width = WIDE setting](/README.md.d/ss-gnome-ambiguous-wide.png "Notice less overlapping glyphs")
+
+However, setting ambiguous-width to wide is not a panacea. For example, if the glyph is being replaced by a font of a very different aspect ratio from your default. For example, here is what happens when the "DEC Terminal" font is chosen (which is twice as high as it is wide):
+
+![Example of Gnome Terminal using DEC Terminal font](/README.md.d/ss-gnome-wide-decfont.png "Notice glyphs once again overlap")
+
+Notice that with this default font, glyphs are overlapping even though
+ambiguous-width is set to wide.
+
 </details>
 
 
 ## Xterm
-<details>
 
-Xterm does the same thing when an antialiased (vector) font is
-selected, filling in with system fonts if the selected font is too
-limited. Bitmaps fonts however, are trickier.
+Like gnome-terminal, Xterm also uses multiple fonts when an
+antialiased (vector) font is selected (`-fa Inconsolata -fs 18`),
+filling in with other system fonts if the selected font is too
+limited. Xterm can also work with bitmaps fonts, but they are a little
+trickier.
 
 ### For bitmap fonts
+<details>
 
 Xterm will use only a single font if you specify a bitmap font using
 `-fn`. That means you'll need to find one font that covers every
-section of Unicode you use. This can be rather tricky.
+section of Unicode you use. This is not always easy.
 
 
 The default xterm font, called "fixed", seems a terrible choice as it
@@ -115,12 +134,30 @@ and uses. So, not a bad choice, and it comes pre-installed.
     
 ![Example of XTerm(322) running fonttable with neep](/README.md.d/ss-xterm-neep.png "Technically, this is the 'neep' font, which I prefer to 'fixed', but requires you to install xfonts-jmk")
 
+</details>
+
 ### For antialiased fonts
+<details>
 
 XTerm already fills in missing glyphs for you by using other fonts
-when you specify an antialiased font using `-fa`. Use `-fs` to specify
-the point size. Note: "Antialiased" is how XTerm refers to vector
+when you specify an antialiased font using `-fa`. (Use `-fs` to specify
+the point size). Note: _Antialiased_ is how XTerm refers to vector
 fonts like TrueType, OpenType, and Type 1.
+
+While XTerm and GNOME-Terminal both use FreeType to render antialiased
+fonts, unlike GNOME-terminal, XTerm enforces character cell boundaries
+and does not let glyphs overlap. Instead, overly wide glyphs are
+truncated. Whether this is better or not is a matter of taste. 
+
+![Example of XTerm(369) running fonttable with DroidSansMono](/README.md.d/ss-xterm-droidsans.png "fonttable demonstrating how some wide characters get truncated in XTerm")
+
+Note that XTerm defaults to using the font color specified by the user
+rather than colors builtin to a font. Again, this is a matter of
+taste, but it should be noted that most emoji fonts nowadays are
+designed *only* in color, so single color fonts for certain ranges may
+look outdated or be missing glyphs.
+
+#### Debugging XTerm Antialiased fonts
 
 If you wish to see which fonts are getting loaded as you run
 fonttable, set the XFT_DEBUG environment variable to 3 before running
@@ -145,9 +182,5 @@ can use XFT_DEBUG to find out what is going on.
 
     XFT_DEBUG=3 xterm -fs 24 -fa DroidSansMono -fd DroidSansFallback -xrm "XTerm*vt100.limitFontsets: 0"
     
-
-
-![Example of XTerm(322) running fonttable with DroidSansMono](/README.md.d/ss-xterm-droidsans.png "fonttable demonstrating DroidSansFallback being used by xterm as a double-size font")
-
 </details>
 
