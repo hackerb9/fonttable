@@ -53,7 +53,7 @@ and run it.
 
 ## Usage
 
-    fonttable [ -c ] [ -s ] [ -u ] [ START..END ]
+    fonttable [ -c ] [ -s ] [ -u ] [ START..END ] 
         -c | --cache
                 Use cached UnicodeData.txt embedded in this script.
                 Usually the cached version is only used if the file is
@@ -67,9 +67,9 @@ and run it.
         START..END
             Show range from START to END, inclusive. (Hexadecimal). 
             START defaults to 0, END defaults to infinity.
-            Example: fonttable 1F170..98
+            Example: fonttable 2500..90 1FB00..AF
 
-        UnicodeData.txt contains about 30,000 characters.
+        UnicodeData.txt contains arund 30,000 characters.
         Unihan adds another 70,000.
 
 ____
@@ -80,14 +80,19 @@ Different terminal programs and fonts will give you drastically
 different results.
 
 ## Gnome Terminal 
+<details>
 
-For example, Gnome-Terminal-3.18.3 appears to fall back to proportional fonts for code points not in its default font, causing it to have overlapping glyphs. There is no setting to tell it not to do this:
+Gnome-Terminal-3.18.3 appears to fall back to proportional fonts for code points not in its default font, causing it to have overlapping glyphs. There is no setting to tell it not to do this:
 
 ![Example of Gnome Terminal 3.18.3 running fonttable](/README.md.d/ss-gnome-terminal.png "Notice the overlapping glyphs")
 
 While messy, this does have the benefit of ensuring that any Unicode character you come across will be shown. (Assuming you have a font for it, of course). 
+</details>
+
 
 ## Xterm
+<details>
+
 Xterm does the same thing when an antialiased (vector) font is
 selected, filling in with system fonts if the selected font is too
 limited. Bitmaps fonts however, are trickier.
@@ -143,4 +148,6 @@ can use XFT_DEBUG to find out what is going on.
 
 
 ![Example of XTerm(322) running fonttable with DroidSansMono](/README.md.d/ss-xterm-droidsans.png "fonttable demonstrating DroidSansFallback being used by xterm as a double-size font")
+
+</details>
 
