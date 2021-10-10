@@ -58,9 +58,9 @@ Usage: fonttable [ -c ] [ -s ] [ -u ] [ START..END ]
 	START..END
 		Show range from START to END, inclusive. (Hexadecimal).
 		START defaults to 0, END defaults to infinity.
-		Example: fonttable 1F170..98
+		Multiple ranges are allowed: fonttable 2590..f 1fb00..ff
 
-	UnicodeData.txt contains about 30,000 characters.
+	UnicodeData.txt contains around 30,000 characters.
         Unihan adds another 70,000.
 
 EOF
@@ -68,7 +68,7 @@ EOF
 }
 
 main() {
-    local start="" end=""
+    local -a ranges		# Array of ranges to display
 
     while [ "$1" ]; do
 	case "$1" in
@@ -80,38 +80,41 @@ main() {
 	    -U|--no-unihan-cache*) unihancacheflag=;		;;
 	    # mkhancache is for internal use when updating this script.
 	    --mkhancache) mkhancache; exit 0;	;; 	
-	    *..*)
-		# User specified a range START..END
-		start=${1%..*}
-		end=${1#*..}
+	    *..*) # User specified a range START..END
+		ranges+=("$1")
 		;;
 	    *) usage ;;
 	esac
 	shift
     done
 
-    # Allow U+2022, U2022, 0x2022, or 2022 for start and end
-    start=${start#u}; start=${start#U}; start=${start#+}; start=${start#0x}
-    end=${end#u};     end=${end#U};     end=${end#+};     end=${end#0x}
+    # If user didn't specify a range, then show all visible Unicode codepoints
+    if [[ ${#ranges} -lt 1 ]]; then ranges=(..); fi
 
-    if [[ -z "$start" ]]; then start=0; fi
-    if [[ -z "$end" ]]; then end=10FFFF; fi
+    for r in "${ranges[@]}"; do
+	local start=${r%..*}
+	local end=${r#*..}
 
-    # Allow users to specify things like "fonttable 23b0..f"
-    if [[ ${#start} > ${#end} ]]; then
-	local -i d=$(( ${#start} - ${#end} ))
-	end=${start:0:$d}$end
-    fi
+	# Allow U+2022, U2022, 0x2022, or 2022
+	start=${start#u}; start=${start#U}; start=${start#+}; start=${start#0x}
+	end=${end#u};     end=${end#U};     end=${end#+};     end=${end#0x}
+
+	# Allow users to specify things like "fonttable 23b0..f"
+	if [[ "$start" && "$end" && ${#start} > ${#end} ]]; then
+	    local -i d=$(( ${#start} - ${#end} ))
+	    end=${start:0:$d}$end
+	fi
 
 
-    catucd | restrict "$start" "$end" \
-    	| awk  -F';'  '$3 !~ /C|M|Z/ { printf ("%c", strtonum("0x" $1)) };'
-    echo
-    if [ "$showhanflag" ]; then
-        catunihan | restrict "$start" "$end" \
-	    | awk '{printf ("%c", strtonum("0x" $1));}'
-        echo
-    fi  
+	catucd | restrict "$start" "$end" \
+    	    | awk  -F';'  '$3 !~ /C|M|Z/ { printf ("%c", strtonum("0x" $1)) };'
+	echo
+	if [ "$showhanflag" ]; then
+            catunihan | restrict "$start" "$end" \
+		| awk '{printf ("%c", strtonum("0x" $1));}'
+            echo
+	fi  
+    done
 }
 
 
@@ -125,9 +128,12 @@ restrict() {
     local end="$2"
 
     if [[ -z "$start" && -z "$end" ]]; then
-	cat			# Not restricting
+	cat					# Not restricting
 	return
     fi
+
+    if [[ -z "$start" ]]; then start=0; fi
+    if [[ -z "$end" ]]; then end=10FFFF; fi
 
     awk -F';' -v start=$((16#$start)) -v end=$((16#$end)) '
     {
