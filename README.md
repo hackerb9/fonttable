@@ -53,30 +53,30 @@ and run it.
 
 ## Usage
 
-fonttable: Show every Unicode character in your terminal.
+	fonttable: Show every Unicode character in your terminal.
 
-Usage: fonttable [ -c ] [ -s ] [ -u ] [ START..END ] [ -f FONT ]
-	-c | --cache
-		Use cached UnicodeData.txt embedded in this script.
-		Usually the cached version is only used if the file is
-		not in /usr/share/unicode/ or the current directory.
-	-s | --show-unihan
-		Also show CJK data from the Unihan database.
-		The default is to not show characters that Unicode has
-		designated as mappings to other standards.
-	-u | --unihan-cache
-		Use a cached copy of the list of valid CJK characters
-		instead of looking for Unihan_DictionaryIndices.txt.
-	START..END
-		Show range from START to END, inclusive. (Hexadecimal).
-		START defaults to 0, END defaults to infinity.
-		Multiple ranges are allowed: fonttable 2590..f 1fb00..ff
-	-f FONT | --font-name FONT
-		Show every Unicode glyph which is defined in FONT. 
-		(Does not display in FONT, only shows character coverage.)
+	Usage: fonttable [ -c ] [ -s ] [ -u ] [ START..END ] [ -f FONT ]
+		-c | --cache
+			Use cached UnicodeData.txt embedded in this script.
+			Usually the cached version is only used if the file is
+			not in /usr/share/unicode/ or the current directory.
+		-s | --show-unihan
+			Also show CJK data from the Unihan database.
+			The default is to not show characters that Unicode has
+			designated as mappings to other standards.
+		-u | --unihan-cache
+			Use a cached copy of the list of valid CJK characters
+			instead of looking for Unihan_DictionaryIndices.txt.
+		START..END
+			Show range from START to END, inclusive. (Hexadecimal).
+			START defaults to 0, END defaults to infinity.
+			Multiple ranges are allowed: fonttable 2590..f 1fb00..ff
+		-f FONT | --font-name FONT
+			Show every Unicode glyph which is defined in FONT. 
+			(Does not display in FONT, only shows character coverage.)
 
-        UnicodeData.txt contains around 30,000 characters.
-        Unihan adds another 70,000.
+			UnicodeData.txt contains around 30,000 characters.
+			Unihan adds another 70,000.
 
 ____
 
