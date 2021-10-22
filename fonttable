@@ -43,7 +43,7 @@ usage() {
     cat << EOF
 fonttable: Show every Unicode character in your terminal.
 
-Usage: fonttable [ -c ] [ -s ] [ -u ] [ START..END ]
+Usage: fonttable [ -c ] [ -s ] [ -u ] [ START..END ] [ -f FONT ]
 	-c | --cache
 		Use cached UnicodeData.txt embedded in this script.
 		Usually the cached version is only used if the file is
@@ -59,10 +59,9 @@ Usage: fonttable [ -c ] [ -s ] [ -u ] [ START..END ]
 		Show range from START to END, inclusive. (Hexadecimal).
 		START defaults to 0, END defaults to infinity.
 		Multiple ranges are allowed: fonttable 2590..f 1fb00..ff
-
-	UnicodeData.txt contains around 30,000 characters.
-        Unihan adds another 70,000.
-
+	-f FONT | --font-name FONT
+		Show every Unicode glyph which is defined in FONT. 
+		(Does not display in FONT, only shows character coverage.)
 EOF
     exit
 }
@@ -77,11 +76,19 @@ main() {
 	    -s|--show-unihan*) showhanflag=yup;		;;
 	    -S|--no-show-unihan*) showhanflag=;		;;
 	    -u|--unihan-cache*) unihancacheflag=yup; showhanflag=yup;	;;
-	    -U|--no-unihan-cache*) unihancacheflag=;		;;
+	    -U|--no-unihan-cache*) unihancacheflag=;	;;
 	    # mkhancache is for internal use when updating this script.
 	    --mkhancache) mkhancache; exit 0;	;; 	
 	    *..*) # User specified a range START..END
 		ranges+=("$1")
+		;;
+	    -f|-fn|--font*) # User wants to see the range for a fontfile
+		if [[ -z "$2" ]]; then
+		    echo "Usage: $(basename $0) $1 <font>" >&2
+		    exit 1
+		fi
+		ranges+=($(get_font_range "$2"))
+		shift;
 		;;
 	    *) usage ;;
 	esac
@@ -155,6 +162,33 @@ printvisible() {
 		};
     	 	END {if (gotone) print "";}'
 }
+
+
+get_font_range() {
+    # Given a fontfile or name as $1, output a list of unicode ranges
+    # that are covered by that font in the form: "20..7e a0 16a0
+    # 16a2..16a3 16a6 16a9..16ab 16b1 16b3 16b7..16b9 16bb 16be 16c1
+    # 16c4 16c7..16c9 16cb 16cf 16d2 16d6..16d7 16da 16dd..16e5
+    # 16eb..16ed 16f1..16f8 2008 200b..200f 202a..202e"
+
+    local font=$1
+    local fontfile
+
+    if [[ -r "$font" ]]; then
+	# Yay! it is a file already. Nothing to do
+	fontfile=${font}
+    else
+	fontfile=$(fc-match --format='%{file}\n' "$font")
+	shopt -s nocasematch
+	if [[ "$fontfile" != *"$font"* ]]; then
+	    echo "Warning: Using $fontfile" >&2
+	fi
+	shopt -u nocasematch
+    fi
+
+    fc-query --format='%{charset}\n' "$fontfile" | sed 's/-/../g'
+}
+
 
 
 catucd() {
