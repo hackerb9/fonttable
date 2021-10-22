@@ -53,24 +53,76 @@ and run it.
 
 ## Usage
 
-    fonttable [ -c ] [ -s ] [ -u ] [ START..END ] 
-        -c | --cache
-                Use cached UnicodeData.txt embedded in this script.
-                Usually the cached version is only used if the file is
-                not in /usr/share/unicode/ or the current directory.
-        -s | --show-unihan
-                Show Chinese, Japanese, Korean data from the Unihan database.
-                Default is to only show characters from UnicodeData.txt
-        -u | --unihan-cache
-                Use a cached copy of the list of valid CJK characters
-                instead of looking for Unihan_DictionaryIndices.txt.
-        START..END
-            Show range from START to END, inclusive. (Hexadecimal). 
-            START defaults to 0, END defaults to infinity.
-            Multiple ranges are allowed: fonttable 2590..f 1fb00..ff
+fonttable: Show every Unicode character in your terminal.
+
+Usage: fonttable [ -c ] [ -s ] [ -u ] [ START..END ] [ -f FONT ]
+	-c | --cache
+		Use cached UnicodeData.txt embedded in this script.
+		Usually the cached version is only used if the file is
+		not in /usr/share/unicode/ or the current directory.
+	-s | --show-unihan
+		Also show CJK data from the Unihan database.
+		The default is to not show characters that Unicode has
+		designated as mappings to other standards.
+	-u | --unihan-cache
+		Use a cached copy of the list of valid CJK characters
+		instead of looking for Unihan_DictionaryIndices.txt.
+	START..END
+		Show range from START to END, inclusive. (Hexadecimal).
+		START defaults to 0, END defaults to infinity.
+		Multiple ranges are allowed: fonttable 2590..f 1fb00..ff
+	-f FONT | --font-name FONT
+		Show every Unicode glyph which is defined in FONT. 
+		(Does not display in FONT, only shows character coverage.)
 
         UnicodeData.txt contains around 30,000 characters.
         Unihan adds another 70,000.
+
+____
+
+## About --font-name
+
+The -f / --font-name option is like the range option, but it shows
+only the codepoints that are defined in a specific font (and that are
+marked as normal, printable characters in Unicode). For example:
+
+    fonttable -f MyriadPro
+
+### Caveat 1: Does not use the named font
+
+Note that being a terminal application, fonttable will show the
+codepoints in the default font, not in whatever font is being
+examined.
+
+### Caveat 2: FontConfig is required
+
+Your machine must have FontConfig, which will be true for Debian
+GNU/Linux and derivatives, but may not be true universally.
+Additionally, the fontname must in a format FontConfig likes. For
+example:
+
+    fonttable -f LTCCaslon                          # Works
+    fonttable -f "LTC Caslon"                       # Works
+    fonttable -f "LTC Caslon Swash Long Regular"    # Works
+
+But, as it happens:
+
+    fonttable -f Caslon                     # Does Not Work 
+    fonttable -f "LTC Caslon Swash Long"    # Does Not Work
+
+If you are unsure of the name, try `fc-list | grep -i caslon`. You may
+also specify a font filename directly. For example:
+
+    fonttable ~/.local/share/fonts/P22CezannePro.ttf
+
+
+### Caveat 3: Decorative and expert fonts
+
+Some decorative and expert fonts define glyphs at unusual character
+codepoints which are not standard Unicode. Those characters will not
+be found by this script. For example:
+
+	fonttable -f AdobeWoodType		# Shows no glyphs!
 
 ____
 
