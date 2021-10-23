@@ -86,9 +86,13 @@ The -f / --font-name option is like the range option, but it shows
 only the codepoints that are defined in a specific font (and that are
 marked as normal, printable characters in Unicode). For example:
 
-    fonttable -f MyriadPro
+    fonttable -f NotoSans
 
-### Caveat 1: Does not use the named font
+Fonts may be specified by filename:
+
+    fonttable -f /usr/share/fonts/X11/misc/neep-iso10646-1-10x20.pcf.gz 
+
+### Caveat 1: Does not display using the named font
 
 Note that being a terminal application, fonttable will show the
 codepoints in the default font, not in whatever font is being
@@ -115,12 +119,11 @@ also specify a font filename directly. For example:
 
     fonttable ~/.local/share/fonts/P22CezannePro.ttf
 
-
 ### Caveat 3: Decorative and expert fonts
 
 Some decorative and expert fonts define glyphs at unusual character
-codepoints which are not standard Unicode. Those characters will not
-be found by this script. For example:
+codepoints which are not in the Unicode standard. Those characters
+will not be found by this script. For example:
 
 	fonttable -f AdobeWoodType		# Shows no glyphs!
 
