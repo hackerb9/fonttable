@@ -178,16 +178,16 @@ get_font_range() {
 	# Yay! it is a file already. Nothing to do
 	fontfile=${font}
     else
-	fontfile=$(fc-match --format='%{file}\t%{fullname}\n' "$font")
+	fontfile=$(fc-match --format='%{file}\t%{family}\n' "$font")
 	# "fontfile" is actually a filepath, then a tab, then the font name.
 	shopt -s nocasematch
 	if [[ "$fontfile" != *"$font"* ]]; then 
 	    # Requested font name is not part of the font filename + fullname
-	    fallback=$(fc-match --format='%{file}\t%{fullname}\n' "bogusfontname")
+	    fallback=$(fc-match --format='%{file}\t%{family}\n' "bogusfontname")
 	    if [[ "$fontfile" == "$fallback" ]]; then
 		# Returned fontfile is the default fallback font
 		printf "\aERROR: Matched default font: ${fontfile#*$'\t'}\n" >&2
-		output=$(fc-list --format '%{fullname[0]}\n' | grep -i "${font}" | sort -u)
+		output=$(fc-list -f '%{family[0]}\n' | grep -i "${font}" | sort -u)
 		if [[ "$output" ]]; then
 		    printf "Did you perhaps mean one of these:\n" >&2
 		    echo "$output" | column -s$'\n' | sed $'s/^/\t/' >&2
