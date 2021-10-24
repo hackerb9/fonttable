@@ -87,7 +87,7 @@ main() {
 		    echo "Usage: $(basename $0) $1 <font>" >&2
 		    exit 1
 		fi
-		ranges+=($(get_font_range "$2"))
+		ranges+=($(get_font_range "$2")) || exit
 		shift;
 		;;
 	    *) usage ;;
@@ -172,21 +172,37 @@ get_font_range() {
     # 16eb..16ed 16f1..16f8 2008 200b..200f 202a..202e"
 
     local font=$1
-    local fontfile
+    local fontfile fallback
 
     if [[ -r "$font" ]]; then
 	# Yay! it is a file already. Nothing to do
 	fontfile=${font}
     else
-	fontfile=$(fc-match --format='%{file}\n' "$font")
+	fontfile=$(fc-match --format='%{file}\t%{fullname}\n' "$font")
+	# "fontfile" is actually a filepath, then a tab, then the font name.
 	shopt -s nocasematch
-	if [[ "$fontfile" != *"$font"* ]]; then
-	    echo "Warning: Using $fontfile" >&2
+	if [[ "$fontfile" != *"$font"* ]]; then 
+	    # Requested font name is not part of the font filename + fullname
+	    fallback=$(fc-match --format='%{file}\t%{fullname}\n' "bogusfontname")
+	    if [[ "$fontfile" == "$fallback" ]]; then
+		# Returned fontfile is the default fallback font
+		printf "\aERROR: Matched default font: ${fontfile#*$'\t'}\n" >&2
+		output=$(fc-list --format '%{fullname[0]}\n' | grep -i "${font}" | sort -u)
+		if [[ "$output" ]]; then
+		    printf "Did you perhaps mean one of these:\n" >&2
+		    echo "$output" | column -s$'\n' | sed $'s/^/\t/' >&2
+
+		fi
+		exit 1
+	    else
+		# Returned fontfile is possibly correct
+		printf "Notice: Using ${fontfile#*$'\t'}\n" >&2
+	    fi
 	fi
 	shopt -u nocasematch
     fi
 
-    fc-query --format='%{charset}\n' "$fontfile" | sed 's/-/../g'
+    fc-query --format='%{charset}\n' "${fontfile%$'\t'*}" | sed 's/-/../g'
 }
 
 
