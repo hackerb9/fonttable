@@ -175,7 +175,7 @@ maybe_sixel() {
 	cat
     else
 	while read line; do
-	    echo convert -size 800x -font "$fontname" -pointsize 18 \
+	    convert -size 800x -font "$fontname" -pointsize 18 \
 		    caption:"$line\n" sixel:- | sed 's/-\e\\/\e\\\nfoo\n/'
 	done
     fi
