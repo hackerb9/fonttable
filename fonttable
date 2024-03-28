@@ -6,9 +6,17 @@
 # *graphic* character. General classes C, M, and Z are omitted.
 # (See the table of general category values at the end of this script.)
 
-# Additionally: the Unicode Consortium's "UnicodeData.txt" file does
-# not list CJK characters, but they can be found in the adjacent
-# Unihan database. If you'd like to see them as well, specify "-s" 
+# While fonttable sends all Unicode characters to stdout, what
+# characters are _actually_ displayed depends upon what fonts you have
+# installed on your system and if your terminal is setup to use them.
+
+# Optionally, one can specify a particular font using -f fontname
+# and only the glyphs that that font contains will be displayed.
+# (Requires fontconfig and sixel graphics.)
+
+# Note: the Unicode Consortium's "UnicodeData.txt" file does not list
+# CJK characters, but they can be found in the adjacent Unihan
+# database. If you'd like to see them as well, specify "-s"
 
 # If the UnicodeData.txt and Unihan_DictionaryIndices.txt files are
 # not found on your system, cached versions in this script will be
@@ -43,7 +51,7 @@ usage() {
     cat << EOF
 fonttable: Show every Unicode character in your terminal.
 
-Usage: fonttable [ -c ] [ -s ] [ -u ] [ START..END ] [ -f FONT ]
+Usage: fonttable [ -c ] [ -s ] [ -u ] [ START..END ] [ -f FONT ] [ -d FONT ]
 	-c | --cache
 		Use cached UnicodeData.txt embedded in this script.
 		Usually the cached version is only used if the file is
@@ -59,12 +67,12 @@ Usage: fonttable [ -c ] [ -s ] [ -u ] [ START..END ] [ -f FONT ]
 		Show range from START to END, inclusive. (Hexadecimal).
 		START defaults to 0, END defaults to infinity.
 		Multiple ranges are allowed: fonttable 2590..f 1fb00..ff
-	-f FONT | --font-name FONT
-		Show every Unicode glyph which is defined in FONT. 
-		(Does not display in FONT, only shows character coverage.)
-        -r FONT | --render-font FONT
-		Render every Unicode glyph which is defined in FONT as
+        -f FONT | --font-name FONT
+		Display every Unicode glyph which is defined in FONT as
 		a sixel image directly in the terminal. 
+	-d FONT | --defined-in FONT
+		Like -f, but displays using the default terminal font,
+		not graphics. Useful to quickly see character coverage.
 EOF
     exit
 }
@@ -85,10 +93,10 @@ main() {
 	    *..*) # User specified a range START..END
 		ranges+=("$1")
 		;;
-	    -r|--render|-f|-fn|--font*)
+	    -f|-fn|--font*|-d|--defined*)
 		# User wants to see the range for a fontfile
 		fontflag=${1##*-}
-		fontflag=${fontflag:0:1}
+		fontflag=${fontflag:0:1} 	# either "f" or "d"
 		if [[ -z "$2" ]]; then
 		    echo "Usage: $(basename $0) $1 <font>" >&2
 		    exit 1
@@ -171,12 +179,17 @@ printvisible() {
 }
 
 maybe_sixel() {
-    if [[ -z "$fontflag" || "$fontflag" = "f" ]]; then
+    if [[ -z "$fontflag" || "$fontflag" = "d" ]]; then
+	# -d: Just display using normal font
 	cat
     else
+	# -f: Use sixel graphics to display the font
+	esc=$'\e'; backslash='\\'; newline='\n'
 	while read line; do
-	    convert -size 800x -font "$fontname" -pointsize 18 \
-		    caption:"$line\n" sixel:- | sed 's/-\e\\/\e\\\nfoo\n/'
+	    convert -size 800x -font "$fontname" -pointsize 20 \
+		    caption:"$line" sixel:- |
+		sed -r "s#-${esc}${backslash}#${esc}${backslash}${newline}#"
+	    if [[ ${PIPESTATUS[0]} != 0 ]]; then echo $'\e\\'; break; fi
 	done
     fi
 }
