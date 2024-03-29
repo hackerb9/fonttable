@@ -232,11 +232,12 @@ get_font_info() {
 
     shopt -s nocasematch
     if [[ "$fontfile $fontfamily-$fontstyle" != *"$font"* ]]; then 
-	# Requested font is not part of the filename or fontname
-	fallback=$(fc-match --format='%{fullname[0]}\n' "bogusfontname" | head -1)
+	# Uh oh. Requested font is not part of the filename or fontname
+	fallback=$(fc-match --format='%{fullname[0]}\n' "bogusfontname")
 	if [[ "$fontfullname" == "$fallback" ]]; then
 	    # Returned font is just the default fallback font. 
 	    printf "\aERROR: Matched default font: $fontfullname\n" >&2
+	    font=${font// /.*}; font=${font//-/.*};
 	    output=$(fc-list -f '%{family[0]}\n' | grep -i "${font}" | sort -u)
 	    if [[ "$output" ]]; then
 		printf "Did you perhaps mean one of these:\n" >&2
@@ -246,7 +247,9 @@ get_font_info() {
 	    return 1 
 	else
 	    # Returned fontfile is possibly correct
-	    printf "Notice: Using '${fontfamily}:style=${fontstyle}'\n" >&2
+	    if [[ ${font} != ${fontfamily}:style=${fontstyle} ]]; then
+		printf "Notice: Using '${fontfamily}:style=${fontstyle}'\n" >&2
+	    fi
 	fi
     fi
     shopt -u nocasematch
