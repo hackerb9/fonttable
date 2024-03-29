@@ -51,31 +51,34 @@ usage() {
     cat << EOF
 fonttable: Show every Unicode character in your terminal.
 
-Usage: fonttable [ -c ] [ -s ] [ -u ] [ START..END ] [ -f FONT ] [ -d FONT ]
-	-c | --cache
+Usage: fonttable [ -csu ] [ START..END ] [ -f FONT [ -p POINTSIZE ] ]
+
+    START..END	Show range from START to END, inclusive. (Hexadecimal).
+		START defaults to 0, END defaults to infinity.
+		Multiple ranges are allowed: fonttable 2590..f 1fb00..ff
+    -f FONT | --font-name FONT
+		Display every Unicode glyph which is defined in FONT as
+		a sixel image directly in the terminal. Use -p for size.
+    -d FONT | --defined-in FONT
+		Like -f, but display using the default terminal font,
+		not graphics. Useful to check character coverage.
+    -c | --cache
 		Use cached UnicodeData.txt embedded in this script.
 		Usually the cached version is only used if the file is
 		not in /usr/share/unicode/ or the current directory.
-	-s | --show-unihan
+    -s | --show-unihan
 		Also show CJK data from the Unihan database.
 		The default is to not show characters that Unicode has
 		designated as mappings to other standards.
-	-u | --unihan-cache
+    -u | --unihan-cache
 		Use a cached copy of the list of valid CJK characters
 		instead of looking for Unihan_DictionaryIndices.txt.
-	START..END
-		Show range from START to END, inclusive. (Hexadecimal).
-		START defaults to 0, END defaults to infinity.
-		Multiple ranges are allowed: fonttable 2590..f 1fb00..ff
-        -f FONT | --font-name FONT
-		Display every Unicode glyph which is defined in FONT as
-		a sixel image directly in the terminal. 
-	-d FONT | --defined-in FONT
-		Like -f, but displays using the default terminal font,
-		not graphics. Useful to quickly see character coverage.
 EOF
     exit
 }
+
+# Default size of the font to render
+declare -g pointsize=20
 
 main() {
     local -a ranges		# Array of ranges to display
@@ -106,7 +109,15 @@ main() {
 		   < <(get_font_info "$fontname")
 		if [[ $? -ne 0 ]]; then exit 1; fi
 		ranges+=($(get_font_range "$fontfamily:style=$fontstyle")) || exit
-		shift 2;
+		shift
+		;;
+	    -p|*-point*size)
+		if [[ -z "$2" ]]; then
+		    echo "Usage: $(basename $0) $1 <font>" >&2
+		    exit 1
+		fi
+		pointsize="$2"
+		shift
 		;;
 	    *) usage ;;
 	esac
@@ -200,8 +211,9 @@ maybe_sixel() {
 	    line=${line//\%/%%}	# Quote percents from ImageMagick's "caption:"
 	    #line=${line//&/\&amp;amp;}	# Quote amp (only for "pango:").
 	    #line=${line//</\&amp;lt;}	# Quote < (only for "pango:").
-	    convert -size 800x -font "${fontfullname// /-}" -pointsize 20 \
-		    -fill white -background black caption:"$line" sixel:- |
+	    convert -size 800x -fill white -background black \
+		    -font "${fontfullname// /-}" -pointsize ${pointsize} \
+		     caption:"$line" sixel:- |
 		sed -r "s#-${esc}${backslash}#${esc}${backslash}${newline}#"
 	    if [[ ${PIPESTATUS[0]} != 0 ]]; then echo $'\e\\'; break; fi
 	done
