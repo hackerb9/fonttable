@@ -94,15 +94,17 @@ main() {
 		ranges+=("$1")
 		;;
 	    -f|-fn|--font*|-d|--defined*)
-		# User wants to see the range for a fontfile
+		# User wants to see the range of characters in fontfile
 		fontflag=${1##*-}
 		fontflag=${fontflag:0:1} 	# either "f" or "d"
 		if [[ -z "$2" ]]; then
 		    echo "Usage: $(basename $0) $1 <font>" >&2
 		    exit 1
 		fi
-		ranges+=($(get_font_range "$2")) || exit
 		fontname="$2"
+		IFS=$'\t' read fontfile fontfullname fontstyle < <(get_font_info "$fontname")
+		if [[ $? -ne 0 ]]; then exit 1; fi
+		ranges+=($(get_font_range "$fontfile")) || exit
 		shift 2;
 		;;
 	    *) usage ;;
@@ -110,8 +112,15 @@ main() {
 	shift
     done
 
+    if [[ "$DEBUG" ]]; then
+	echo "echo num ranges is ${#ranges[@]}"
+	for ((i=0; i<${#ranges[@]}; i++)); do
+	    showargs "${ranges[i]}"
+	done
+    fi
+
     # If user didn't specify a range, then show all visible Unicode codepoints
-    if [[ ${#ranges} -lt 1 ]]; then ranges=(..); fi
+    if [[ ${#ranges[@]} -lt 1 ]]; then ranges=(..); fi
 
     for r in "${ranges[@]}"; do
 	local start=${r%..*}
@@ -186,7 +195,8 @@ maybe_sixel() {
 	# -f: Use sixel graphics to display the font
 	esc=$'\e'; backslash='\\'; newline='\n'
 	while read line; do
-	    convert -size 800x -font "$fontname" -pointsize 20 \
+	    line=${line/\%/%%}	# Quote percents from ImageMagick
+	    convert -size 800x -font "${fontfullname// /-}" -pointsize 21 \
 		    caption:"$line" sixel:- |
 		sed -r "s#-${esc}${backslash}#${esc}${backslash}${newline}#"
 	    if [[ ${PIPESTATUS[0]} != 0 ]]; then echo $'\e\\'; break; fi
@@ -195,45 +205,63 @@ maybe_sixel() {
 }
 
 
+
+get_font_info() {
+    # Given a fontfile or name as $1,
+    # output the font filename, fullname 
+    # separated by tabs.
+    # Fullname is Family plus, usually, Style. Needs to be exact for ImageMagick.
+    local font=$1
+    local cmd fallback fontfile fontfullname fontstyle
+
+    if [[ -r "$font" ]]; then
+	# Yay! it is a file already. 
+	cmd=fc-query
+    else
+	# Try to match it as a font name.
+	cmd=fc-match
+    fi
+    IFS=$'\t' read fontfile fontfullname fontstyle < \
+       <($cmd --format='%{file[0]}\t%{fullname[0]}\t%{style[0]}\n' "$font")
+
+    shopt -s nocasematch
+    if [[ "$fontfile $fontfullname" != *"$font"* ]]; then 
+	# Requested font name is not part of the font filename or font family
+	fallback=$(fc-match --format='%{fullname[0]}\n' "bogusfontname" | head -1)
+	if [[ "$fontfullname" == "$fallback" ]]; then
+	    # Returned font is just the default fallback font. 
+	    output=$(fc-list -f '%{fullname[0]}\n' | grep -i "${font}" | sort -u)
+	    if [[ "$output" && $(echo "$output" |wc -l) -eq 1 ]]; then
+		printf "Notice: Trying ${output}\n" >&2
+		get_font_info "$output"
+		return
+	    elif [[ "$output" ]]; then
+		printf "\aERROR: Matched default font: $fontfullname\n" >&2
+		printf "Did you perhaps mean one of these:\n" >&2
+		echo "$output" | column -s$'\n' | sed $'s/^/\t/' >&2
+		return 1 
+	    else
+		printf "\aERROR: Matched default font: $fontfullname\n" >&2
+		return 1
+	    fi
+	else
+	    # Returned fontfile is possibly correct
+	    printf "Notice: Using ${fontfullname}\n" >&2
+	fi
+    fi
+    shopt -u nocasematch
+    echo -e "${fontfile}\t${fontfullname}\t${fontstyle}"
+}
+
 get_font_range() {
-    # Given a fontfile or name as $1, output a list of unicode ranges
+    # Given a fontfile as $1, output a list of unicode ranges
     # that are covered by that font in the form: "20..7e a0 16a0
     # 16a2..16a3 16a6 16a9..16ab 16b1 16b3 16b7..16b9 16bb 16be 16c1
     # 16c4 16c7..16c9 16cb 16cf 16d2 16d6..16d7 16da 16dd..16e5
     # 16eb..16ed 16f1..16f8 2008 200b..200f 202a..202e"
 
-    local font=$1
-    local fontfile fallback
-
-    if [[ -r "$font" ]]; then
-	# Yay! it is a file already. Nothing to do
-	fontfile=${font}
-    else
-	fontfile=$(fc-match --format='%{file}\t%{family}\n' "$font")
-	# "fontfile" is actually a filepath, then a tab, then the font name.
-	shopt -s nocasematch
-	if [[ "$fontfile" != *"$font"* ]]; then 
-	    # Requested font name is not part of the font filename + fullname
-	    fallback=$(fc-match --format='%{file}\t%{family}\n' "bogusfontname")
-	    if [[ "$fontfile" == "$fallback" ]]; then
-		# Returned fontfile is the default fallback font
-		printf "\aERROR: Matched default font: ${fontfile#*$'\t'}\n" >&2
-		output=$(fc-list -f '%{family[0]}\n' | grep -i "${font}" | sort -u)
-		if [[ "$output" ]]; then
-		    printf "Did you perhaps mean one of these:\n" >&2
-		    echo "$output" | column -s$'\n' | sed $'s/^/\t/' >&2
-
-		fi
-		exit 1
-	    else
-		# Returned fontfile is possibly correct
-		printf "Notice: Using ${fontfile#*$'\t'}\n" >&2
-	    fi
-	fi
-	shopt -u nocasematch
-    fi
-
-    fc-query --format='%{charset}\n' "${fontfile%$'\t'*}" | sed 's/-/../g'
+    local fontfile=$1
+    fc-query --format='%{charset[0]}\n' "${fontfile}" | sed 's/-/../g'
 }
 
 
