@@ -9,7 +9,15 @@ and such, so characters in categories `C`, `M`, and `Z` won't be printed. (See t
  
 If you don't have [`/usr/share/unicode/UnicodeData.txt`](http://unicode.org/Public/UNIDATA/UnicodeData.txt) on your system, a version cached in this script will be automatically used. (v14.0.0, current as of September 2021 from unicode.org).
 
-Additionally: the Unicode Consortium's ["UnicodeData.txt"](http://unicode.org/Public/UNIDATA/UnicodeData.txt) file does not list CJK characters, but they can be found in the adjacent [Unihan](http://unicode.org/Public/UNIDATA/Unihan.zip) database. If you'd like to see them as well, specify "-s" 
+While fonttable sends all printable Unicode characters to stdout, what
+characters are _actually_ displayed depends upon what fonts you have
+installed on your system and if your terminal is setup to use them.
+
+Optionally, one can specify a particular font using -f fontname
+to restrict the display to glyphs defined in that font.
+(Requires fontconfig and sixel graphics.)
+
+Note: the Unicode Consortium's ["UnicodeData.txt"](http://unicode.org/Public/UNIDATA/UnicodeData.txt) file does not list CJK characters, but they can be found in the adjacent [Unihan](http://unicode.org/Public/UNIDATA/Unihan.zip) database. If you'd like to see them as well, specify "-s" 
 
 ## Installation
 
@@ -72,12 +80,14 @@ and run it.
 			START defaults to 0, END defaults to infinity.
 			Multiple ranges are allowed: fonttable 2590..f 1fb00..ff
 		-f FONT | --font-name FONT
-			Show every Unicode glyph which is defined in FONT. 
-			(Does not display in FONT, only shows character coverage.)
+			Display every Unicode glyph which is defined in FONT as
+			a sixel image directly in the terminal. 
+		-d FONT | --defined-in FONT
+			Like -f, but displays using the default terminal font,
+			not graphics. Useful to quickly see character coverage.
 
 			UnicodeData.txt contains around 30,000 characters.
 			Unihan adds another 70,000.
-
 ____
 
 ## About --font-name
@@ -92,11 +102,15 @@ Fonts may be specified by filename:
 
     fonttable -f /usr/share/fonts/X11/misc/neep-iso10646-1-10x20.pcf.gz 
 
-### Caveat 1: Does not display using the named font
+### Caveat 1: Requires sixel graphics to display in the named font
 
-Note that being a terminal application, fonttable will show the
-codepoints in the default font, not in whatever font is being
-examined.
+Fonttable uses sixel graphics to draw the font requested. Use the 
+`-d FONT` option if you would like to use a specific font to limit which
+codepoints are displayed, but still show them in the default font.
+
+BUG: Currently the sixel handling is quite naive. The terminal is not
+queried if it supports sixels graphics, nor how many pixels high each
+character should be, nor the proper text colors.
 
 ### Caveat 2: FontConfig is required
 
@@ -133,6 +147,12 @@ ____
 
 Different terminal programs and fonts will give you drastically
 different results.
+
+## XXX TODO XXX 
+
+This section needs to be redone as it does not show examples of sixel
+output. Also, the terminals listed are now quite old.
+
 
 ## Gnome Terminal 
 
