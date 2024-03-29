@@ -102,15 +102,21 @@ main() {
 		    exit 1
 		fi
 		fontname="$2"
-		IFS=$'\t' read fontfile fontfullname fontstyle < <(get_font_info "$fontname")
+		IFS=$'\t' read fontfile fontfullname fontfamily fontstyle \
+		   < <(get_font_info "$fontname")
 		if [[ $? -ne 0 ]]; then exit 1; fi
-		ranges+=($(get_font_range "$fontfullname")) || exit
+		ranges+=($(get_font_range "$fontfamily:style=$fontstyle")) || exit
 		shift 2;
 		;;
 	    *) usage ;;
 	esac
 	shift
     done
+
+    if [[ "$DEBUG" ]]; then
+	echo $fontfamily-$fontstyle >&2
+	showargs "${ranges[@]}" >&2
+    fi
 
     # If user didn't specify a range, then show all visible Unicode codepoints
     if [[ ${#ranges[@]} -lt 1 ]]; then ranges=(..); fi
@@ -190,9 +196,10 @@ maybe_sixel() {
 	# -f: Use sixel graphics to display the font
 	esc=$'\e'; backslash='\\'; newline='\n'
 	while read line; do
+	    if [[ "$DEBUG" ]]; then echo "$line"; fi
 	    line=${line//\%/%%}	# Quote percents from ImageMagick's "caption:"
-#	    line=${line//&/\&amp;amp;}	# Quote amp from ImageMagick's pango.
-#	    line=${line//</\&amp;lt;}	# Quote < from ImageMagick's pango.
+	    #line=${line//&/\&amp;amp;}	# Quote amp (only for "pango:").
+	    #line=${line//</\&amp;lt;}	# Quote < (only for "pango:").
 	    convert -size 800x -font "${fontfullname// /-}" -pointsize 20 \
 		    -fill white -background black caption:"$line" sixel:- |
 		sed -r "s#-${esc}${backslash}#${esc}${backslash}${newline}#"
@@ -205,13 +212,13 @@ maybe_sixel() {
 
 get_font_info() {
     # Given a fontfile or name as $1,
-    # output the font filename, fullname, and style
+    # output the font filename, fullname, family, and style
     # separated by tabs.
 
     # Note: Fullname is Family plus (usually) Style and (sometimes) Width.
-    # Needs to be exact for ImageMagick.
-    local font=$1
-    local cmd fallback fontfile fontfullname fontstyle
+    # Fullname is the fontname needed by ImageMagick.
+    local font="$*"
+    local cmd fallback fontfile fontfullname fontfamily fontstyle
 
     if [[ -r "$font" ]]; then
 	# Yay! it is a file already. 
@@ -220,36 +227,30 @@ get_font_info() {
 	# Try to match it as a font name.
 	cmd=fc-match
     fi
-    IFS=$'\t' read fontfile fontfullname fontstyle < \
-       <($cmd --format='%{file[0]}\t%{fullname[0]}\t%{style[0]}\n' "$font")
+    IFS=$'\t' read fontfile fontfullname fontfamily fontstyle < \
+       <($cmd --format='%{file[0]}\t%{fullname[0]}\t%{family[0]}\t%{style[0]}\n' "$font")
 
     shopt -s nocasematch
-    if [[ "$fontfile $fontfullname" != *"$font"* ]]; then 
-	# Requested font name is not part of the font filename or font family
+    if [[ "$fontfile $fontfamily-$fontstyle" != *"$font"* ]]; then 
+	# Requested font is not part of the filename or fontname
 	fallback=$(fc-match --format='%{fullname[0]}\n' "bogusfontname" | head -1)
 	if [[ "$fontfullname" == "$fallback" ]]; then
 	    # Returned font is just the default fallback font. 
-	    output=$(fc-list -f '%{file[0]}\t%{fullname[0]}\t%{style[0]}\n' | grep -i "${font}" | sort -u)
-	    if [[ "$output" && $(echo "$output" |wc -l) -eq 1 && "$output" != "$font" ]]; then
-		printf "Notice: Using ${fontfullname}\n" >&2
-		echo "$output"
-		return
-	    elif [[ "$output" ]]; then
-		printf "\aERROR: Matched default font: $fontfullname\n" >&2
+	    printf "\aERROR: Matched default font: $fontfullname\n" >&2
+	    output=$(fc-list -f '%{family[0]}\n' | grep -i "${font}" | sort -u)
+	    if [[ "$output" ]]; then
 		printf "Did you perhaps mean one of these:\n" >&2
-		echo "$output" | cut -d$'\t' -f2 | column -s$'\n' | sed $'s/^/\t/' >&2
-		return 1 
-	    else
-		printf "\aERROR: Matched default font: $fontfullname\n" >&2
-		return 1
+		echo "$output" | column -s$'\n' | sed $'s/^/\t/' >&2
 	    fi
+	    shopt -u nocasematch
+	    return 1 
 	else
 	    # Returned fontfile is possibly correct
-	    printf "Notice: Using ${fontfullname}\n" >&2
+	    printf "Notice: Using '${fontfamily}:style=${fontstyle}'\n" >&2
 	fi
     fi
     shopt -u nocasematch
-    echo -e "${fontfile}\t${fontfullname}\t${fontstyle}"
+    echo -e "${fontfile}\t${fontfullname}\t${fontfamily}\t${fontstyle}"
 }
 
 get_font_range() {
@@ -259,8 +260,7 @@ get_font_range() {
     # 16c4 16c7..16c9 16cb 16cf 16d2 16d6..16d7 16da 16dd..16e5
     # 16eb..16ed 16f1..16f8 2008 200b..200f 202a..202e"
 
-    local fullname=$1
-    fc-match --format='%{charset[0]}\n' "${fullname}" | sed 's/-/../g'
+    fc-match --format='%{charset[0]}\n' "$*" | sed 's/-/../g'
 }
 
 
