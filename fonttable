@@ -104,7 +104,7 @@ main() {
 		fontname="$2"
 		IFS=$'\t' read fontfile fontfullname fontstyle < <(get_font_info "$fontname")
 		if [[ $? -ne 0 ]]; then exit 1; fi
-		ranges+=($(get_font_range "$fontfile")) || exit
+		ranges+=($(get_font_range "$fontfullname")) || exit
 		shift 2;
 		;;
 	    *) usage ;;
@@ -196,7 +196,7 @@ maybe_sixel() {
 	esc=$'\e'; backslash='\\'; newline='\n'
 	while read line; do
 	    line=${line/\%/%%}	# Quote percents from ImageMagick
-	    convert -size 800x -font "${fontfullname// /-}" -pointsize 21 \
+	    convert -size 800x -font "${fontfullname// /-}" -pointsize 20 \
 		    caption:"$line" sixel:- |
 		sed -r "s#-${esc}${backslash}#${esc}${backslash}${newline}#"
 	    if [[ ${PIPESTATUS[0]} != 0 ]]; then echo $'\e\\'; break; fi
@@ -230,15 +230,15 @@ get_font_info() {
 	fallback=$(fc-match --format='%{fullname[0]}\n' "bogusfontname" | head -1)
 	if [[ "$fontfullname" == "$fallback" ]]; then
 	    # Returned font is just the default fallback font. 
-	    output=$(fc-list -f '%{fullname[0]}\n' | grep -i "${font}" | sort -u)
-	    if [[ "$output" && $(echo "$output" |wc -l) -eq 1 ]]; then
-		printf "Notice: Trying ${output}\n" >&2
-		get_font_info "$output"
+	    output=$(fc-list -f '%{file[0]}\t%{fullname[0]}\t%{style[0]}\n' | grep -i "${font}" | sort -u)
+	    if [[ "$output" && $(echo "$output" |wc -l) -eq 1 && "$output" != "$font" ]]; then
+		printf "Notice: Using ${fontfullname}\n" >&2
+		echo "$output"
 		return
 	    elif [[ "$output" ]]; then
 		printf "\aERROR: Matched default font: $fontfullname\n" >&2
 		printf "Did you perhaps mean one of these:\n" >&2
-		echo "$output" | column -s$'\n' | sed $'s/^/\t/' >&2
+		echo "$output" | cut -d$'\t' -f2 | column -s$'\n' | sed $'s/^/\t/' >&2
 		return 1 
 	    else
 		printf "\aERROR: Matched default font: $fontfullname\n" >&2
@@ -254,14 +254,14 @@ get_font_info() {
 }
 
 get_font_range() {
-    # Given a fontfile as $1, output a list of unicode ranges
+    # Given a font's fullname as $1, output a list of unicode ranges
     # that are covered by that font in the form: "20..7e a0 16a0
     # 16a2..16a3 16a6 16a9..16ab 16b1 16b3 16b7..16b9 16bb 16be 16c1
     # 16c4 16c7..16c9 16cb 16cf 16d2 16d6..16d7 16da 16dd..16e5
     # 16eb..16ed 16f1..16f8 2008 200b..200f 202a..202e"
 
-    local fontfile=$1
-    fc-query --format='%{charset[0]}\n' "${fontfile}" | sed 's/-/../g'
+    local fullname=$1
+    fc-match --format='%{charset[0]}\n' "${fullname}" | sed 's/-/../g'
 }
 
 
