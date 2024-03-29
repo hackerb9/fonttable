@@ -63,31 +63,41 @@ and run it.
 
 	fonttable: Show every Unicode character in your terminal.
 
-	Usage: fonttable [ -c ] [ -s ] [ -u ] [ START..END ] [ -f FONT ]
-		-c | --cache
-			Use cached UnicodeData.txt embedded in this script.
-			Usually the cached version is only used if the file is
-			not in /usr/share/unicode/ or the current directory.
-		-s | --show-unihan
-			Also show CJK data from the Unihan database.
-			The default is to not show characters that Unicode has
-			designated as mappings to other standards.
-		-u | --unihan-cache
-			Use a cached copy of the list of valid CJK characters
-			instead of looking for Unihan_DictionaryIndices.txt.
+	Usage: fonttable [ -csu ] [ START..END ] [ -f FONT [ -p POINTSIZE ]]
+
 		START..END
 			Show range from START to END, inclusive. (Hexadecimal).
 			START defaults to 0, END defaults to infinity.
 			Multiple ranges are allowed: fonttable 2590..f 1fb00..ff
+
 		-f FONT | --font-name FONT
 			Display every Unicode glyph which is defined in FONT as
 			a sixel image directly in the terminal. 
+
+		-p POINTSIZE | --point-size POINTSIZE
+			Change the size of the font rendered by -f.
+			
 		-d FONT | --defined-in FONT
 			Like -f, but displays using the default terminal font,
 			not graphics. Useful to quickly see character coverage.
 
-			UnicodeData.txt contains around 30,000 characters.
-			Unihan adds another 70,000.
+		-c | --cache
+			Use cached UnicodeData.txt embedded in this script.
+			Usually the cached version is only used if the file is
+			not in /usr/share/unicode/ or the current directory.
+
+		-s | --show-unihan
+			Also show CJK data from the Unihan database.
+			The default is to not show characters that Unicode has
+			designated as mappings to other standards.
+
+		-u | --unihan-cache
+			Use a cached copy of the list of valid CJK characters
+			instead of looking for Unihan_DictionaryIndices.txt.
+
+
+	UnicodeData.txt contains around 30,000 characters.
+	Unihan adds another 70,000.
 ____
 
 ## About --font-name
@@ -135,11 +145,17 @@ also specify a font filename directly. For example:
 
 ### Caveat 3: Decorative and expert fonts
 
-Some decorative and expert fonts define glyphs at unusual character
-codepoints which are not in the Unicode standard. Those characters
-will not be found by this script. For example:
+Some decorative and expert fonts define glyphs that do not have
+mappings to Unicode codepoints or that map to Private Use. Those
+characters will not be found by this script. For example:
 
 	fonttable -f AdobeWoodType		# Shows no glyphs!
+
+However, with some effort, one can move such glyphs to Unicode code
+points using a program such as FontForge.
+
+<img width=90% align="center" src="README.md.d/woodtype.png"
+alt="Image of running fonttable to view Adobe Wood Type">
 
 ____
 
@@ -148,10 +164,16 @@ ____
 Different terminal programs and fonts will give you drastically
 different results.
 
-## XXX TODO XXX 
+**XXX TODO**
 
-This section needs to be redone as it does not show examples of sixel
-output. Also, the terminals listed are now quite old.
+This section needs to be redone as the terminals tested are now quite old.
+
+## Sixel output (on XTerm)
+
+<img width=90% align="center" src="README.md.d/courier.png"
+alt="Image of running fonttable -f ibmcourier.">
+
+<img width=90% align="center" src="README.md.d/runic.png" alt="Image of running fonttable to view a font with few glyphs: noto sans runic.">
 
 
 ## Gnome Terminal 
