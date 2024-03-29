@@ -112,13 +112,6 @@ main() {
 	shift
     done
 
-    if [[ "$DEBUG" ]]; then
-	echo "echo num ranges is ${#ranges[@]}"
-	for ((i=0; i<${#ranges[@]}; i++)); do
-	    showargs "${ranges[i]}"
-	done
-    fi
-
     # If user didn't specify a range, then show all visible Unicode codepoints
     if [[ ${#ranges[@]} -lt 1 ]]; then ranges=(..); fi
 
@@ -188,6 +181,8 @@ printvisible() {
 }
 
 maybe_sixel() {
+    # A filter to pipe into which may show each line as a graphic image.
+
     if [[ -z "$fontflag" || "$fontflag" = "d" ]]; then
 	# -d: Just display using normal font
 	cat
@@ -195,9 +190,11 @@ maybe_sixel() {
 	# -f: Use sixel graphics to display the font
 	esc=$'\e'; backslash='\\'; newline='\n'
 	while read line; do
-	    line=${line/\%/%%}	# Quote percents from ImageMagick
+	    line=${line//\%/%%}	# Quote percents from ImageMagick's "caption:"
+#	    line=${line//&/\&amp;amp;}	# Quote amp from ImageMagick's pango.
+#	    line=${line//</\&amp;lt;}	# Quote < from ImageMagick's pango.
 	    convert -size 800x -font "${fontfullname// /-}" -pointsize 20 \
-		    caption:"$line" sixel:- |
+		    -fill white -background black caption:"$line" sixel:- |
 		sed -r "s#-${esc}${backslash}#${esc}${backslash}${newline}#"
 	    if [[ ${PIPESTATUS[0]} != 0 ]]; then echo $'\e\\'; break; fi
 	done
@@ -208,9 +205,11 @@ maybe_sixel() {
 
 get_font_info() {
     # Given a fontfile or name as $1,
-    # output the font filename, fullname 
+    # output the font filename, fullname, and style
     # separated by tabs.
-    # Fullname is Family plus, usually, Style. Needs to be exact for ImageMagick.
+
+    # Note: Fullname is Family plus (usually) Style and (sometimes) Width.
+    # Needs to be exact for ImageMagick.
     local font=$1
     local cmd fallback fontfile fontfullname fontstyle
 
