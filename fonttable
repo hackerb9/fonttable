@@ -94,7 +94,11 @@ main() {
 	    # mkhancache is for internal use when updating this script.
 	    --mkhancache) mkhancache; exit 0;	;; 	
 	    *..*) # User specified a range START..END
-		ranges+=("$1")
+		if [[ $fontflag ]]; then
+		    ranges=("$1")
+		else
+		    ranges+=("$1")
+		fi
 		;;
 	    -f|-fn|--font*|-d|--defined*)
 		# User wants to see the range of characters in fontfile
@@ -108,7 +112,9 @@ main() {
 		IFS=$'\t' read fontfile fontfullname fontfamily fontstyle \
 		   < <(get_font_info "$fontname")
 		if [[ $? -ne 0 ]]; then exit 1; fi
-		ranges+=($(get_font_range "$fontfamily:style=$fontstyle")) || exit
+		if [[ -z $ranges ]]; then
+		    ranges=($(get_font_range "$fontfamily:style=$fontstyle")) || exit
+		fi
 		shift
 		;;
 	    -p|*-point*size)
